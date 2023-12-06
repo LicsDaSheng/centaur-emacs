@@ -138,9 +138,10 @@ prepended to the element after the #+HEADER: tag."
 	       "* Topic: %^{Description}  %^g %? Added: %U"))
 
         org-todo-keywords
-        '((sequence "TODO(t)" "DOING(i)" "HANGUP(h)" "|" "DONE(d)" "CANCEL(c)")
+        '((sequence "TODO(t)" "DOING(i)"  "WAITING(h)" "HANGUP(h)" "|" "DONE(d)" "CANCEL(c)")
           (sequence "⚑(T)" "🏴(I)" "❓(H)" "|" "✔(D)" "✘(C)"))
         org-todo-keyword-faces '(("HANGUP" . warning)
+                                 ("WAITING" . warning)
                                  ("❓" . warning))
         org-priority-faces '((?A . error)
                              (?B . warning)
