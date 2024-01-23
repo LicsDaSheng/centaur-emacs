@@ -140,7 +140,8 @@ prepended to the element after the #+HEADER: tag."
         org-todo-keywords
         '((sequence "TODO(t)" "DOING(i)"  "WAITING(h)" "HANGUP(h)" "|" "DONE(d)" "CANCEL(c)")
           (sequence "⚑(T)" "🏴(I)" "❓(H)" "|" "✔(D)" "✘(C)"))
-        org-todo-keyword-faces '(("HANGUP" . warning)
+        org-todo-keyword-faces '(("DONE" . white)
+                                 ("HANGUP" . warning)
                                  ("WAITING" . warning)
                                  ("❓" . warning))
         org-priority-faces '((?A . error)

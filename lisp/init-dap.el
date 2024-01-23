@@ -36,7 +36,7 @@
 (when emacs/>=29p
   (use-package dape
     :bind (("<f5>" . dape)
-           ("M-<f5>" . dape-hydra/body))
+           ("C-c d" . dape-hydra/body))
     :custom (dape-buffer-window-arrangment 'right)
     :pretty-hydra
     ((:title (pretty-hydra-title "Debug" 'codicon "nf-cod-debug")
