@@ -1,6 +1,6 @@
 ;; init-edit.el --- Initialize editing configurations.	-*- lexical-binding: t -*-
 
-;; Copyright (C) 2006-2023 Vincent Zhang
+;; Copyright (C) 2006-2024 Vincent Zhang
 
 ;; Author: Vincent Zhang <seagle0128@gmail.com>
 ;; URL: https://github.com/seagle0128/.emacs.d
@@ -91,7 +91,17 @@
          ("C-c C-z v" . browse-url-of-file))
   :init
   (with-eval-after-load 'dired
-    (bind-key "C-c C-z f" #'browse-url-of-file dired-mode-map)))
+    (bind-key "C-c C-z f" #'browse-url-of-file dired-mode-map))
+
+  ;; For WSL
+  (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
+        (cmd-args '("/c" "start")))
+    (when (file-exists-p cmd-exe)
+      (setq browse-url-generic-program  cmd-exe
+            browse-url-generic-args     cmd-args
+            browse-url-browser-function 'browse-url-generic)
+      (when (daemonp)
+        (advice-add #'browse-url :override #'browse-url-generic)))))
 
 ;; Click to browse URL or to send to e-mail address
 (use-package goto-addr
@@ -139,8 +149,12 @@
                           (aggressive-indent-mode -1)))))
   :config
   ;; Disable in some modes
-  (dolist (mode '(gitconfig-mode asm-mode web-mode html-mode css-mode go-mode scala-mode prolog-inferior-mode))
-    (push mode aggressive-indent-excluded-modes))
+  (dolist (mode '(gitconfig-mode
+                  asm-mode web-mode html-mode css-mode
+                  go-mode scala-mode
+                  shell-mode term-mode vterm-mode
+                  prolog-inferior-mode))
+    (add-to-list 'aggressive-indent-excluded-modes mode))
 
   ;; Disable in some commands
   (add-to-list 'aggressive-indent-protected-commands #'delete-trailing-whitespace t)
@@ -294,11 +308,6 @@
               hungry-delete-except-modes
               '(help-mode minibuffer-mode minibuffer-inactive-mode calc-mode)))
 
-;; Framework for mode-specific buffer indexes
-(use-package imenu
-  :ensure nil
-  :bind (("C-." . imenu)))
-
 ;; Move to the beginning/end of line or code
 (use-package mwim
   :bind (([remap move-beginning-of-line] . mwim-beginning)
@@ -410,6 +419,18 @@
                      'face '(:inherit shadow :height 0.8))
                     " "))))
   (setq hs-set-up-overlay #'hs-display-code-line-counts))
+
+;; Copy&paste GUI clipboard from text terminal
+(unless sys/win32p
+  (use-package xclip
+    :hook (after-init . xclip-mode)
+    :config
+    ;; @see https://github.com/microsoft/wslg/issues/15#issuecomment-1796195663
+    (when (eq xclip-method 'wl-copy)
+      (set-clipboard-coding-system 'gbk) ; for wsl
+      (setq interprogram-cut-function
+            (lambda (text)
+              (start-process "xclip"  nil xclip-program "--trim-newline" "--type" "text/plain;charset=utf-8" text))))))
 
 ;; Open files as another user
 (unless sys/win32p

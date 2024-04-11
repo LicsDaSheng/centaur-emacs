@@ -1,6 +1,6 @@
 ;; init-ui.el --- Better lookings and appearances.	-*- lexical-binding: t -*-
 
-;; Copyright (C) 2006-2023 Vincent Zhang
+;; Copyright (C) 2006-2024 Vincent Zhang
 
 ;; Author: Vincent Zhang <seagle0128@gmail.com>
 ;; URL: https://github.com/seagle0128/.emacs.d
@@ -80,10 +80,13 @@
     (progn
       ;; Make certain buffers grossly incandescent
       (use-package solaire-mode
-        :hook (after-load-theme . solaire-global-mode))
+        :hook (after-init . solaire-global-mode))
+
       ;; Excellent themes
       (use-package doom-themes
-        :bind ("C-c T" . centaur-load-theme)
+        :custom
+        (doom-themes-enable-bold t)
+        (doom-themes-enable-italic t)
         :init (centaur-load-theme centaur-theme t)
         :config
         ;; Enable flashing mode-line on errors
@@ -97,7 +100,9 @@
             (let ((buf (current-buffer))
                   (cookies (mapcar (lambda (face)
                                      (face-remap-add-relative face 'doom-themes-visual-bell))
-                                   '(mode-line mode-line-active))))
+                                   (if (facep 'mode-line-active)
+                                       '(mode-line-active solaire-mode-line-active-face)
+                                     '(mode-line solaire-mode-line-face)))))
               (force-mode-line-update)
               (run-with-timer 0.15 nil
                               (lambda ()
@@ -106,7 +111,7 @@
                                   (force-mode-line-update))))))
           (advice-add #'doom-themes-visual-bell-fn :override #'my-doom-themes-visual-bell-fn))))
   (progn
-    (warn "The current theme is incompatible!")
+    (warn "The current theme may be incompatible!")
     (centaur-load-theme centaur-theme t)))
 
 ;; Mode-line
@@ -165,9 +170,9 @@
      ("g f" (setq doom-modeline-irc-buffers (not doom-modeline-irc-buffers))
       "irc buffers" :toggle doom-modeline-irc-buffers)
      ("g s" (progn
-              (setq doom-modeline-checker-simple-format (not doom-modeline-checker-simple-format))
+              (setq doom-modeline-check-simple-format (not doom-modeline-check-simple-format))
               (and (bound-and-true-p flycheck-mode) (flycheck-buffer)))
-      "simple checker" :toggle doom-modeline-checker-simple-format)
+      "simple check format" :toggle doom-modeline-check-simple-format)
      ("g t" (setq doom-modeline-time (not doom-modeline-time))
       "time" :toggle doom-modeline-time)
      ("g v" (setq doom-modeline-env-version (not doom-modeline-env-version))
@@ -393,10 +398,6 @@
     (setq ns-use-thin-smoothing t)
     ;; Don't open a file in a new frame
     (setq ns-pop-up-frames nil)))
-
-;; Don't use GTK+ tooltip
-(when (boundp 'x-gtk-use-system-tooltips)
-  (setq x-gtk-use-system-tooltips nil))
 
 ;; Ligatures support
 (when (and emacs/>=28p (not centaur-prettify-symbols-alist))

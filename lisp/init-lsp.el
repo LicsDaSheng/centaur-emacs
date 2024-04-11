@@ -1,6 +1,6 @@
 ;; init-lsp.el --- Initialize LSP configurations.	-*- lexical-binding: t -*-
 
-;; Copyright (C) 2018-2023 Vincent Zhang
+;; Copyright (C) 2018-2024 Vincent Zhang
 
 ;; Author: Vincent Zhang <seagle0128@gmail.com>
 ;; URL: https://github.com/seagle0128/.emacs.d
@@ -40,7 +40,10 @@
                            (unless (derived-mode-p 'emacs-lisp-mode 'lisp-mode 'makefile-mode 'snippet-mode)
                              (eglot-ensure))))
             ((markdown-mode yaml-mode yaml-ts-mode) . eglot-ensure))
-     :init (setq eglot-send-changes-idle-time 0)
+     :init
+     (setq read-process-output-max (* 1024 1024)) ; 1MB
+     (setq eglot-autoshutdown t
+           eglot-send-changes-idle-time 0.5)
      :config
      (use-package consult-eglot
        :bind (:map eglot-mode-map
@@ -48,7 +51,7 @@
   ('lsp-mode
    ;; Performace tuning
    ;; @see https://emacs-lsp.github.io/lsp-mode/page/performance/
-   (setq read-process-output-max (* 1024 1024)) ;; 1MB
+   (setq read-process-output-max (* 1024 1024)) ; 1MB
    (setenv "LSP_USE_PLISTS" "true")
 
    ;; Emacs client for the Language Server Protocol
@@ -526,7 +529,7 @@
    (use-package lsp-java
      :hook ((java-mode java-ts-mode jdee-mode) . (lambda () (require 'lsp-java))))))
 
-(unless centaur-lsp
+(when centaur-lsp
   ;; Enable LSP in org babel
   ;; https://github.com/emacs-lsp/lsp-mode/issues/377
   (cl-defmacro lsp-org-babel-enable (lang)
@@ -563,8 +566,8 @@
                           (upcase ,lang))))))))
 
   (defconst org-babel-lang-list
-    '("go" "python" "ipython" "ruby" "js" "css" "sass" "c" "rust" "java" "cpp" "c++"))
-  (add-to-list 'org-babel-lang-list "shell")
+    '("go" "python" "ipython" "ruby" "js" "css" "sass" "c" "rust" "java" "cpp" "c++" "shell")
+    "The supported programming languages for interactive Babel.")
   (dolist (lang org-babel-lang-list)
     (eval `(lsp-org-babel-enable ,lang))))
 
